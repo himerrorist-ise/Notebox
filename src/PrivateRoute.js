@@ -1,10 +1,18 @@
-import React from 'react';
-import { Route, Navigate } from 'react-router-dom';
+import React, {useContext} from 'react';
+import { Navigate } from 'react-router-dom';
 
-import {auth} from "./firebaseConfig";
+// import {auth} from "./firebaseConfig";
+import { AppContext } from "./Config/ContextProvider";
 
 function PrivateRoute({Component, ...rest}) {
-    
+    const {setUserData} = useContext(AppContext);
+    const temp = JSON.parse(localStorage.getItem("user"));
+
+    React.useEffect(() => {
+        if (temp){
+            setUserData(temp);
+        }
+      }, []);
     // return (
     // <Route
     //   {...rest}
@@ -14,7 +22,7 @@ function PrivateRoute({Component, ...rest}) {
     // />
     // )
 
-    return auth.currentUser ? <Component /> : <Navigate to="/login" />;
+    return temp !== null ? <Component /> : <Navigate to="/login" />;
 }
 
 export default PrivateRoute
