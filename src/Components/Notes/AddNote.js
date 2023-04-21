@@ -1,20 +1,36 @@
 import React, { useState } from "react";
 import { Grid, Box, InputLabel, TextField, Button } from "@mui/material";
+import { db } from "../../firebaseConfig";
+import { collection, addDoc } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
 
 const AddNote = () =>{
+
+  const navigate = useNavigate();
 
   const [data, setData] = useState({
     Title: "",
     Code: "",
-    Instructer: "",
+    Instructor: "",
     LinkUrl: "",
     Year: "",
     Term: "",
     Description: "",
   });
 
-  const handleSubmit = () => {
-
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await addDoc(collection(db, "Notes"), data);
+    setData({
+      Title: "",
+      Code: "",
+      Instructor: "",
+      LinkUrl: "",
+      Year: "",
+      Term: "",
+      Description: "",
+    });
+    navigate("/Notes");
   }
 
   return(
@@ -34,8 +50,8 @@ const AddNote = () =>{
                 onChange={e => setData({...data, "Code":e.target.value})} />
             </Grid>
             <Grid item xs={6}>
-              <TextField fullWidth label="Instructer" value={data.Instructer}
-                onChange={e => setData({...data, "Instructer":e.target.value})} />
+              <TextField fullWidth label="Instructor" value={data.Instructor}
+                onChange={e => setData({...data, "Instructor":e.target.value})} />
             </Grid><Grid item xs={12}>
               <TextField fullWidth label="Drive Link" value={data.LinkUrl}
                 onChange={e => setData({...data, "LinkUrl":e.target.value})} />

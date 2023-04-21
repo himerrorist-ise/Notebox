@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {Box, Grid, Table, TableHead, TableContainer,
     TableBody, TableRow, TableCell, TextField, Paper } from "@mui/material";
 import Alert from 'react-bootstrap/Alert';
-  
+import { collection, doc, query, onSnapshot  } from "firebase/firestore";
+import { db } from "../../firebaseConfig";
+import ShortcutIcon from '@mui/icons-material/Shortcut';
 
 const Notes = () => {
   const [notes, setNotes] = useState([]);
@@ -11,7 +13,20 @@ const Notes = () => {
 
   const handleChange = (e) => {
 
-  }
+  };
+
+  useEffect(() => {
+    const qu = query(collection(db, "Notes"));
+    const r = onSnapshot(qu, (res) => {
+      let temp = [];
+      res.forEach((doc) => {
+        temp = [...temp, doc.data()];
+      });
+      // console.log(temp);
+      setNotes(temp);
+    });
+    return () => r();
+  }, []);
 
   return (
     <div className="container w-70">
@@ -55,17 +70,17 @@ const Notes = () => {
                       </Alert>
                     </TableCell>
                   </TableRow>) :
-                
-                  notes.map((e, i) => {
+                  notes.map((e, i) => 
                     <TableRow key={i}>
                       <TableCell>{i+1}</TableCell>
                       <TableCell>{e.Title}</TableCell>
                       <TableCell>{e.Code}</TableCell>
-                      <TableCell>{e.Instructer}</TableCell>
+                      <TableCell>{e.Instructor}</TableCell>
                       <TableCell>{e.Term} {e.Year}</TableCell>
-                      <TableCell></TableCell>
+                      <TableCell><a href={e.LinkUrl} target="_blank"><ShortcutIcon /></a></TableCell>
                     </TableRow>
-                  })}
+                  
+                  )}
               </TableBody>
             </Table>
           </TableContainer>
