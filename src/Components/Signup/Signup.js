@@ -15,6 +15,7 @@ const Signup = () => {
   });
 
   const handleSubmit = async (e) => {
+    e.preventDefault();
     let temp = {...data};
     temp.email = temp.email + "@binghamton.edu";
     await createUserWithEmailAndPassword(auth, temp.email, temp.password)
