@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import { Grid, Box, InputLabel, TextField, Button } from "@mui/material";
 import { db } from "../../firebaseConfig";
+import { auth } from "../../firebaseConfig";
 import { collection, addDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
+import { getDocs } from "firebase/firestore";
+
 
 const AddNote = () =>{
 
@@ -31,6 +34,32 @@ const AddNote = () =>{
       Description: "",
     });
     navigate("/Notes");
+    
+    const usersRef = collection(db, 'users');
+    const authE = await getDocs(usersRef);
+    const emails = [];
+    authE.forEach((doc) => {
+      emails.push(doc.data().email);
+    });
+
+    const data = {
+      to: emails,
+    };
+
+    const curlData = JSON.stringify({
+      ...data,
+      subject: "Notebox",
+      body: "<p>New Notes Have Been Added to your Courses!</p>"
+    });
+    
+    const response = await fetch('https://us-central1-email-384816.cloudfunctions.net/gmail-bulk-send', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(curlData)
+    });
+    
   }
 
   return(
