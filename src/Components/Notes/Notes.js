@@ -1,6 +1,8 @@
-import { useState, useEffect } from "react";
-import {Box, Grid, Table, TableHead, TableContainer,
-    TableBody, TableRow, TableCell, TextField, Paper } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import {
+  Box, Grid, Table, TableHead, TableContainer,
+  TableBody, TableRow, TableCell, TextField, Paper, Button
+} from "@mui/material";
 import Alert from 'react-bootstrap/Alert';
 import { collection, doc, query, onSnapshot  } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
@@ -8,12 +10,32 @@ import ShortcutIcon from '@mui/icons-material/Shortcut';
 
 const Notes = () => {
   const [notes, setNotes] = useState([]);
+  const [filteredNotes, setFilteredNotes] = useState([]);
   const [selectedCode, setSelectedCode] = useState("");
   const [selectedInstructer, setSelectedInstructer] = useState("");
 
-  const handleChange = (e) => {
-
+  const handleChangeCode = (e) => {
+    setSelectedCode(e.target.value);
   };
+
+  const handleChangeIns = (e) => {
+    setSelectedInstructer(e.target.value);
+  }
+
+  const handleFilter = (e) => {
+    if (selectedCode != "" && selectedInstructer != ""){
+      setFilteredNotes(notes.filter((el) => el.Code.includes(selectedCode) && el.Instructor.includes(selectedInstructer)));
+    }
+    else if (selectedCode != "" && selectedInstructer == ""){
+      setFilteredNotes(notes.filter((el) => el.Code.includes(selectedCode) ));
+    }
+    else if (selectedCode == "" && selectedInstructer != ""){
+      setFilteredNotes(notes.filter((el) => el.Instructor.includes(selectedInstructer) ));
+    }
+    else{
+      setFilteredNotes([...notes]);
+    }
+  }
 
   useEffect(() => {
     const qu = query(collection(db, "Notes"));
@@ -24,6 +46,7 @@ const Notes = () => {
       });
       // console.log(temp);
       setNotes(temp);
+      setFilteredNotes(temp);
     });
     return () => r();
   }, []);
@@ -34,11 +57,25 @@ const Notes = () => {
       <Grid container rowSpacing={5} columnSpacing={{xs: 1, sm: 2, md: 3}}>
         <Grid item xs={3}>
           <TextField fullWidth label="Code" id="Code"
-            value={selectedCode} onChange={handleChange} />
+            value={selectedCode} onChange={handleChangeCode} />
         </Grid>
         <Grid item xs={3}>
           <TextField fullWidth label="Instructer" id="Instructer"
-            value={selectedInstructer} onChange={handleChange} />
+            value={selectedInstructer} onChange={handleChangeIns} />
+        </Grid>
+        <Grid item xs={3}>
+          <Button type="button" variant="contained" color="success" onClick={(e) => handleFilter(e)}>
+            Filter
+          </Button>
+        </Grid>
+        <Grid item xs={3}>
+          <Button type="button" variant="contained" color="success" onClick={() => {
+            setFilteredNotes([...notes]);
+            setSelectedInstructer("");
+            setSelectedCode("");
+          }}>
+            Reset Filter
+          </Button>
         </Grid>
         <Grid item xs={12}>
           <TableContainer component={Paper}>
@@ -62,7 +99,7 @@ const Notes = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {notes.length === 0 ?
+                {filteredNotes.length === 0 ?
                   (<TableRow>
                     <TableCell colSpan={6}>
                       <Alert key={"info"} variant={"info"}>
@@ -70,7 +107,7 @@ const Notes = () => {
                       </Alert>
                     </TableCell>
                   </TableRow>) :
-                  notes.map((e, i) => 
+                  filteredNotes.map((e, i) =>
                     <TableRow key={i}>
                       <TableCell>{i+1}</TableCell>
                       <TableCell>{e.Title}</TableCell>
